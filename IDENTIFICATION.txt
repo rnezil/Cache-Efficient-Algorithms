@@ -1,0 +1,7 @@
+name "Ryland Nezil"
+student_id "V00157326"
+email "rylandnezil@gmail.com"
+term "2023-05"
+course "SENG475"
+section "T01"
+assignment "cpp_cache"
