@@ -2,6 +2,7 @@
 
 #include <cstddef>
 #include <list>
+#include <cassert>
 
 namespace ra::cache {
 
@@ -35,7 +36,7 @@ void matrix_transpose( const T* a, std::size_t m, std::size_t n, T* b ){
 		if( *hori_blocks.begin() > *vert_blocks.begin() ){
 			// Split vertically
 			iter = hori_blocks.begin();
-			for( std::size_t i = hori_blocks.size(); i != 0; --i ){
+			for( std::size_t i = hori_blocks.size(); i; --i ){
 				// Save 'full' block width
 				split = *iter;
 
@@ -73,36 +74,63 @@ void matrix_transpose( const T* a, std::size_t m, std::size_t n, T* b ){
 	}
 
 	// Tracking variables
-	register std::size_t vert_offset = 0;
-	register std::size_t hori_offset = 0;
+	std::size_t vert_offset = 0;
+	std::size_t hori_offset = 0;
 
 	// Variable to avoid need for calculating
 	// n * m in each iteration of the following
 	// loop
-	register const std::size_t full_size = n * m;
+	const std::size_t full_size = n * m;
 
 	// Iterators
 	auto vert = vert_blocks.begin();
 	auto hori = hori_blocks.begin();
 
-	// Create local variables to improve loop
-	// performance
-	register std::size_t vert_span;
-	register std::size_t hori_span;
+	std::size_t accum;
+	for( hori = hori_blocks.begin(); hori != hori_blocks.end(); ++hori )
+		accum += *hori;
+	//assert( accum == n );
+	std::cout << "Number of cols:\t\t" << n << '\n';
+	std::cout << "Sum hori blocks:\t" << accum << '\n';
+	accum = 0;
+	hori = hori_blocks.begin();
+	for( vert = vert_blocks.begin(); vert != vert_blocks.end(); ++vert )
+		accum += *vert;
+	//assert( accum == m );
+	std::cout << "Number of rows:\t\t" << m << '\n';
+	std::cout << "Sum vert blocks:\t" << accum << '\n';
+	vert = vert_blocks.begin();
 
 	// Write the buffer
 	while( vert_offset * hori_offset < full_size ){
-		vert_span = *vert;
-		hori_span = *hori;
-		for( int i = 0; i < vert_span; ++i ){
-			for( int j = 0; j < hori_span; ++j ){
+		// Write buffer
+		for( int i = 0; i < *vert; ++i ){
+			for( int j = 0; j < *hori; ++j ){
 				*(b + i + j*m + vert_offset + m*hori_offset) = *(a + j + i*n + hori_offset + n*vert_offset);
 			}
 		}
-		hori_accum += *hori;
-		vert_accum += *vert;
+
+		// Move to next block
+		hori_offset += *hori;
 		++hori;
-		++vert
+
+		// If end of horizontal line reached and
+		// there are still vertical lines left,
+		// reset horizontal offset and update
+		// vertical offset
+		if( hori_offset == n ){
+			// Move to next line of blocks
+			vert_offset += *vert;
+			++vert;
+
+			// If there are more lines below,
+			// reset horizontal offset
+			if( vert_offset < m ){
+				hori_offset = 0;
+				hori = hori_blocks.begin();
+			}
+		}
+			
 	}
 }
 
