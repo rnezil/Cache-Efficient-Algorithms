@@ -29,7 +29,7 @@ void matrix_transpose( const T* a, std::size_t m, std::size_t n, T* b ){
 
 	// Temporary variable
 	std::size_t split;
-	
+
 	// Loop for getting block sizes
 	while( *vert_blocks.begin() * *hori_blocks.begin() > MAX_BLOCK_SIZE ){
 		// # cols > # rows
@@ -41,18 +41,20 @@ void matrix_transpose( const T* a, std::size_t m, std::size_t n, T* b ){
 				split = *iter;
 
 				// Divide in half and save value
-				*iter /= 2;
+				*iter = split/2;
+
+				// Compute other half
+				split = split - *iter;
 
 				// Insert new value in front of saved
 				// value; also account for case where
 				// integer divison results in truncation;
 				// also get iterator point to 2 before
 				// next full interval
-				iter = hori_blocks.insert( iter, split - *iter );
+				iter = hori_blocks.insert( iter, split );
 				++++iter;
 			}	
 		}else{
-			std::cout << "Performing vertical split\n";
 			// Split horizontally
 			iter = vert_blocks.begin();
 			for( std::size_t i = vert_blocks.size(); i != 0; --i ){
