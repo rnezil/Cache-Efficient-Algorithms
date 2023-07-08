@@ -40,28 +40,28 @@ int main(){
 	for( int i = 0; i < 10000; ++i )
 		foo[i] = i;
 
-	//printrix<int>(foo, 100, 100);
-	//std::cout << "\n\n\n";
+	printrix<int>(foo, 100, 100);
+	std::cout << "\n\n\n";
 	ra::cache::matrix_transpose( foo, 100, 100, bar );
-	//printrix<int>(bar, 100, 100);
+	printrix<int>(bar, 100, 100);
 	std::cout << "\n\n\n";
 
-	//printrix<int>(foo, 50, 200);
-	//std::cout << "\n\n\n";
+	printrix<int>(foo, 50, 200);
+	std::cout << "\n\n\n";
 	ra::cache::matrix_transpose( foo, 50, 200, bar );
-	//printrix(bar, 50, 200 );
+	printrix(bar, 200, 50 );
 	std::cout << "\n\n\n";
 	
-	//printrix<int>(foo, 200, 50);
-	//std::cout << "\n\n\n";
+	printrix<int>(foo, 200, 50);
+	std::cout << "\n\n\n";
 	ra::cache::matrix_transpose( foo, 200, 50, bar );
-	//printrix(bar, 200, 50 );
+	printrix(bar, 50, 200 );
 	std::cout << "\n\n\n";
 
-	//printrix<int>(foo, 1000, 10);
-	//std::cout << "\n\n\n";
+	printrix<int>(foo, 1000, 10);
+	std::cout << "\n\n\n";
 	ra::cache::matrix_transpose( foo, 1000, 10, bar );
-	//printrix(bar, 1000, 10);
+	printrix(bar, 10, 1000);
 	std::cout << "\n\n\n";
 
 	return 0;

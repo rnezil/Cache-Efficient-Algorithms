@@ -28,7 +28,7 @@ void matrix_transpose( const T* a, std::size_t m, std::size_t n, T* b ){
 	auto iter = vert_blocks.begin();
 
 	// Temporary variable
-	std::size_t split;
+	std::size_t split = 0;
 
 	// Loop for getting block sizes
 	while( *vert_blocks.begin() * *hori_blocks.begin() > MAX_BLOCK_SIZE ){
@@ -41,17 +41,14 @@ void matrix_transpose( const T* a, std::size_t m, std::size_t n, T* b ){
 				split = *iter;
 
 				// Divide in half and save value
-				*iter = split/2;
-
-				// Compute other half
-				split = split - *iter;
+				*iter /= 2;
 
 				// Insert new value in front of saved
 				// value; also account for case where
 				// integer divison results in truncation;
 				// also get iterator point to 2 before
 				// next full interval
-				iter = hori_blocks.insert( iter, split );
+				iter = hori_blocks.insert( iter, split - *iter );
 				++++iter;
 			}	
 		}else{
@@ -87,27 +84,31 @@ void matrix_transpose( const T* a, std::size_t m, std::size_t n, T* b ){
 	// Iterators
 	auto vert = vert_blocks.begin();
 	auto hori = hori_blocks.begin();
-
-	std::size_t accum;
-	for( hori = hori_blocks.begin(); hori != hori_blocks.end(); ++hori )
+/*
+	std::size_t accum = 0;
+	for( hori = hori_blocks.begin(); hori != hori_blocks.end(); ++hori ){
+		std::cout << accum << " ";
 		accum += *hori;
+	}std::cout << '\n';
 	//assert( accum == n );
 	std::cout << "Number of cols:\t\t" << n << '\n';
 	std::cout << "Sum hori blocks:\t" << accum << '\n';
 	accum = 0;
 	hori = hori_blocks.begin();
-	for( vert = vert_blocks.begin(); vert != vert_blocks.end(); ++vert )
+	for( vert = vert_blocks.begin(); vert != vert_blocks.end(); ++vert ){
+		std::cout << accum << " ";
 		accum += *vert;
+	}std::cout << '\n';
 	//assert( accum == m );
 	std::cout << "Number of rows:\t\t" << m << '\n';
 	std::cout << "Sum vert blocks:\t" << accum << '\n';
 	vert = vert_blocks.begin();
-
+*/
 	// Write the buffer
 	while( vert_offset * hori_offset < full_size ){
 		// Write buffer
-		for( int i = 0; i < *vert; ++i ){
-			for( int j = 0; j < *hori; ++j ){
+		for( std::size_t i = 0; i < *vert; ++i ){
+			for( std::size_t j = 0; j < *hori; ++j ){
 				*(b + i + j*m + vert_offset + m*hori_offset) = *(a + j + i*n + hori_offset + n*vert_offset);
 			}
 		}
