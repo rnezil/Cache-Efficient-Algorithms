@@ -51,6 +51,7 @@ void matrix_transpose( const T* a, std::size_t m, std::size_t n, T* b ){
 				++++iter;
 			}	
 		}else{
+			std::cout << "Performing vertical split\n";
 			// Split horizontally
 			iter = vert_blocks.begin();
 			for( std::size_t i = vert_blocks.size(); i != 0; --i ){
