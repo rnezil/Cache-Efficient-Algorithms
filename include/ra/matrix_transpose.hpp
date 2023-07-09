@@ -2,7 +2,6 @@
 
 #include <cstddef>
 #include <list>
-#include <cassert>
 
 namespace ra::cache {
 
@@ -84,26 +83,7 @@ void matrix_transpose( const T* a, std::size_t m, std::size_t n, T* b ){
 	// Iterators
 	auto vert = vert_blocks.begin();
 	auto hori = hori_blocks.begin();
-/*
-	std::size_t accum = 0;
-	for( hori = hori_blocks.begin(); hori != hori_blocks.end(); ++hori ){
-		std::cout << accum << " ";
-		accum += *hori;
-	}std::cout << '\n';
-	//assert( accum == n );
-	std::cout << "Number of cols:\t\t" << n << '\n';
-	std::cout << "Sum hori blocks:\t" << accum << '\n';
-	accum = 0;
-	hori = hori_blocks.begin();
-	for( vert = vert_blocks.begin(); vert != vert_blocks.end(); ++vert ){
-		std::cout << accum << " ";
-		accum += *vert;
-	}std::cout << '\n';
-	//assert( accum == m );
-	std::cout << "Number of rows:\t\t" << m << '\n';
-	std::cout << "Sum vert blocks:\t" << accum << '\n';
-	vert = vert_blocks.begin();
-*/
+
 	// Write the buffer
 	while( vert_offset * hori_offset < full_size ){
 		// Write buffer
