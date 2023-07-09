@@ -113,7 +113,34 @@ void matrix_transpose( const T* a, std::size_t m, std::size_t n, T* b ){
 				hori = hori_blocks.begin();
 			}
 		}
-			
+	}
+}
+
+template<class T>
+void naive_matrix_transpose( const T* a, std::size_t m, std::size_t n, T* b ){
+	for( std::size_t i = 0; i < m; ++i )
+		for( std::size_t j = 0; j < n; ++j )
+			*(b + i + j*m) = *(a + j + i*n);
+}
+
+template<class T>
+void matrix_multiply( const T* a, const T* b, std::size_t m, std::size_t n, 
+		std::size_t p, T* c ){
+}
+
+template<class T>
+void naive_matrix_multiply( const T* a, const T* b, std::size_t m, std::size_t n, 
+		std::size_t p, T* c ){
+	T sum(0);
+	for( std::size_t i = 0; i < m; ++i ){
+		for( std::size_t j = 0; j < p; ++j ){
+			for( std::size_t k = 0; k < n; ++k ){
+				sum += *(a + k + i*n) * *(b + j + k*p);
+			}
+			*c = sum;
+			++c;
+			sum = T(0);
+		}
 	}
 }
 
