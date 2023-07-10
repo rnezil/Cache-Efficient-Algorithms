@@ -1,62 +1,84 @@
 #define MAX_MULTIPLY_BLOCK_SIZE 64
 
 #include <cstddef>
+#include <cassert>
 
 namespace ra::cache {
 
 struct mult_helper{
-	static std::size_t n_orig {0};
-	static std::size_t p_orig {0};
-	static bool valid {false};
-}
+	std::size_t n;
+	std::size_t p;
+	bool valid;
+};
+
+static mult_helper orig;
 
 template<class T>
 void matrix_multiply( const T* a, const T* b, std::size_t m, std::size_t n, 
 		std::size_t p, T* c ){
 	bool last_pass {false};
-	if( !mult_helper::valid ){
+	if( !orig.valid ){
 		// Zero out output matrix in
 		// preparation for accumulation
 		std::size_t c_size = m * p;
-		for( std::size_t i = 0; i < c_size )
+		for( std::size_t i = 0; i < c_size; ++i )
 			*(c + i) = T(0);
 
 		// Store original matrix dimensions
-		mult_helper::n_orig = n;
-		mult_helper::p_orig = p;
-		mult_helper::valid = true;
+		orig.n = n;
+		orig.p = p;
+		orig.valid = true;
 		last_pass = true;
 	}
 
 	if( m * n * p > MAX_MULTIPLY_BLOCK_SIZE ){
 		// If problem size not small enough, recurse
 		if( n >= m && n >= p ){
-			// Size of left chunk
-			std::size_t n_prime = n - n/2;
+			// Variables for clarity
+			std::size_t n_left = n - n/2;
+			std::size_t n_right = n/2;
+			assert( n_left + n_right == n );
 
-			// Left branch
-			matrix_multiply(a, b, m, n_prime, p, c);
+			// Left branch:
+			// left half of a times top half of b
+			// write to c
+			matrix_multiply(a, b, m, n_left, p, c);
 
-			// Right branch
-			matrix_multiply(a + n_prime, b + p*n_prime, m, n - n_prime, p, c);
+			// Right branch:
+			// right half of a times bottom half of b
+			// write to c
+			matrix_multiply(a + n_left, b + n_left*orig.p, m, n_right, p, c);
+
 		}else if( m >= n && m >= p ){
-			// Size of left chunk
-			std::size_t m_prime = m - m/2;
+			// Variables for clarity
+			std::size_t m_left = m - m/2;
+			std::size_t m_right = m/2;
+			assert( m_left + m_right == m );
 
-			// Left branch
-			matrix_multiply(a, b, m_prime, n, p, c);
+			// Left branch:
+			// top half of a times b
+			// write to top half of c
+			matrix_multiply(a, b, m_left, n, p, c);
 
-			// Right branch
-			matrix_multiply(a + n*m_prime, b, m - m_prime, n, p, c + p*m_prime);
+			// Right branch:
+			// bottom half of a times b
+			// write to bottom half of c
+			matrix_multiply(a + m_left*orig.n, b, m_right, n, p, c + m_left*orig.p);
 		}else{
-			// Size of left chunk
-			std::size_t p_prime = p - p/2;
+			// Variables for clarity
+			std::size_t p_left = p - p/2;
+			std::size_t p_right = p/2;
+			assert( p_left + p_right == p );
 
-			// Left branch
-			matrix_multiply(a, b, m, n, p_prime, c);
+			// Left branch:
+			// a times left half of b
+			// write to left half of c
+			matrix_multiply(a, b, m, n, p_left, c);
 
 			// Right branch
-			matrix_multiply(a, b + p_prime, m, n, p - p_prime, c + p_prime);
+			// a times right half of b
+			// write to right half of c
+			matrix_multiply(a, b + p_left, m, n, p_right, c + p_left);
 		}
 	}else{
 		// Once problem size small enough, 
@@ -64,9 +86,9 @@ void matrix_multiply( const T* a, const T* b, std::size_t m, std::size_t n,
 		for( std::size_t i = 0; i < m; ++i ){
 			for( std::size_t j = 0; j < p; ++j ){
 				for( std::size_t k = 0; k < n; ++k ){
-					*(c + j + i*mult_helper::p_orig) += 
-						*(a + k + i*mult_helper::n_orig) *
-						*(b + j + k*mult_helper::p_orig);
+					*(c + j + i*orig.p) += 
+						*(a + k + i*orig.n) *
+						*(b + j + k*orig.p);
 				}
 			}
 		}
@@ -74,8 +96,9 @@ void matrix_multiply( const T* a, const T* b, std::size_t m, std::size_t n,
 
 	// If matrix multiplication complete,
 	// reset mult_helper for next go
-	if( last_pass )
-		mult_helper::valid = false;
+	if( last_pass ){
+		orig.valid = false;
+	}
 }
 
 template<class T>
