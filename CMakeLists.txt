@@ -16,4 +16,5 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 #Add executable target
 add_executable(test_matrix_transpose ${CMAKE_CURRENT_SOURCE_DIR}/app/test_matrix_transpose.cpp ${CMAKE_CURRENT_SOURCE_DIR}/include/ra/matrix_transpose.hpp)
 add_executable(test_matrix_multiply ${CMAKE_CURRENT_SOURCE_DIR}/app/test_matrix_multiply.cpp ${CMAKE_CURRENT_SOURCE_DIR}/include/ra/matrix_multiply.hpp)
+add_executable(test_fft ${CMAKE_CURRENT_SOURCE_DIR}/app/test_fft.cpp ${CMAKE_CURRENT_SOURCE_DIR}/include/ra/matrix_transpose.hpp ${CMAKE_CURRENT_SOURCE_DIR}/include/ra/fft.hpp)
 
