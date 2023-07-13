@@ -48,18 +48,24 @@ void forward_fft(T* x, std::size_t n){
 		matrix_transpose(x, n1, n2, x);	
 
 		// Replace each row with its n1-point DFT
-		for( std::size_t i = 0; i < n2; ++i )
+		for( std::size_t i = 0; i < n2; ++i ){
 			forward_fft(x + n1*i, n1);
+		}
 
-		// Multiply by twiddle factors
-		T j = std::complex<typename T::value_type>(0,2/n);
-		T twiddle = std::pow(std::numbers::e_v<typename T::value_type>,
-				j * std::numbers::pi_v<typename T::value_type>);
+		// Prepare to multiply by twiddle factors
+		T exponent = std::complex<typename T::value_type>(
+				0,std::numbers::pi_v<typename T::value_type> * 2 / n);
+		T twiddle = std::pow(std::numbers::e_v<typename T::value_type>, exponent);
+		T adj;
 
 		// For matrix x with n2 rows and n1 columns
-		for( std::size_t k = 0; k < n2; ++k )
-			for( std::size_t j = 0; j < n1; ++j )
-				x[j + k*n1] *= std::pow(twiddle, -1*k*j);
+		for( std::size_t k = 0; k < n2; ++k ){
+			for( std::size_t j = 0; j < n1; ++j ){
+				adj = std::complex<typename T::value_type>(
+						-1*static_cast<typename T::value_type>(k*j),0);
+				x[j + k*n1] *= std::pow(twiddle, adj);
+			}
+		}
 
 		// Transpose in place for elemental contiguousness
 		matrix_transpose( x, n2, n1, x );
