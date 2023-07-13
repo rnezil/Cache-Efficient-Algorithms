@@ -84,33 +84,74 @@ void matrix_transpose( const T* a, std::size_t m, std::size_t n, T* b ){
 	auto vert = vert_blocks.begin();
 	auto hori = hori_blocks.begin();
 
-	// Write the buffer
-	while( vert_offset * hori_offset < full_size ){
-		// Write buffer
-		for( std::size_t i = 0; i < *vert; ++i ){
-			for( std::size_t j = 0; j < *hori; ++j ){
-				*(b + i + j*m + vert_offset + m*hori_offset) = *(a + j + i*n + hori_offset + n*vert_offset);
+	if( a == b ){
+		// Allocate auxiliary buffer
+		T* c = new T[full_size];
+		
+		// Write auxiliary buffer
+		while( vert_offset * hori_offset < full_size ){
+			for( std::size_t i = 0; i < *vert; ++i ){
+				for( std::size_t j = 0; j < *hori; ++j ){
+					*(c + i + j*m + vert_offset + m*hori_offset) = *(a + j + i*n + hori_offset + n*vert_offset);
+				}
+			}
+
+			// Move to next block
+			hori_offset += *hori;
+			++hori;
+
+			// If end of horizontal line reached and
+			// there are still vertical lines left,
+			// reset horizontal offset and update
+			// vertical offset
+			if( hori_offset == n ){
+				// Move to next line of blocks
+				vert_offset += *vert;
+				++vert;
+
+				// If there are more lines below,
+				// reset horizontal offset
+				if( vert_offset < m ){
+					hori_offset = 0;
+					hori = hori_blocks.begin();
+				}
 			}
 		}
 
-		// Move to next block
-		hori_offset += *hori;
-		++hori;
+		// Write the actual buffer
+		for( std::size_t i = 0; i < full_size; ++i )
+			*(b + i) = *(c + i);
 
-		// If end of horizontal line reached and
-		// there are still vertical lines left,
-		// reset horizontal offset and update
-		// vertical offset
-		if( hori_offset == n ){
-			// Move to next line of blocks
-			vert_offset += *vert;
-			++vert;
+		// De-allocate auxiliary buffer
+		delete[] c;
+	}else{
+		// Write the buffer
+		while( vert_offset * hori_offset < full_size ){
+			for( std::size_t i = 0; i < *vert; ++i ){
+				for( std::size_t j = 0; j < *hori; ++j ){
+					*(b + i + j*m + vert_offset + m*hori_offset) = *(a + j + i*n + hori_offset + n*vert_offset);
+				}
+			}
 
-			// If there are more lines below,
-			// reset horizontal offset
-			if( vert_offset < m ){
-				hori_offset = 0;
-				hori = hori_blocks.begin();
+			// Move to next block
+			hori_offset += *hori;
+			++hori;
+
+			// If end of horizontal line reached and
+			// there are still vertical lines left,
+			// reset horizontal offset and update
+			// vertical offset
+			if( hori_offset == n ){
+				// Move to next line of blocks
+				vert_offset += *vert;
+				++vert;
+
+				// If there are more lines below,
+				// reset horizontal offset
+				if( vert_offset < m ){
+					hori_offset = 0;
+					hori = hori_blocks.begin();
+				}
 			}
 		}
 	}
@@ -118,9 +159,22 @@ void matrix_transpose( const T* a, std::size_t m, std::size_t n, T* b ){
 
 template<class T>
 void naive_matrix_transpose( const T* a, std::size_t m, std::size_t n, T* b ){
-	for( std::size_t i = 0; i < m; ++i )
-		for( std::size_t j = 0; j < n; ++j )
-			*(b + i + j*m) = *(a + j + i*n);
+	if( a == b ){
+		T* c = new T[m*n];
+
+		for( std::size_t i = 0; i < m; ++i )
+			for( std::size_t j = 0; j < n; ++j )
+				*(c + i + j*m) = *(a + j + i*n);
+
+		for( std::size_t i = 0; i < n*m; ++i )
+			*(b + i) = *(c + i);
+
+		delete[] c;
+	}else{
+		for( std::size_t i = 0; i < m; ++i )
+			for( std::size_t j = 0; j < n; ++j )
+				*(b + i + j*m) = *(a + j + i*n);
+	}
 }
 
 }
