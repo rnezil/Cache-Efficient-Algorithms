@@ -1,4 +1,7 @@
-#define MAX_MULTIPLY_BLOCK_SIZE 64
+#define MAX_MULTIPLY_BLOCK_SIZE 128
+// It was found that a block size of
+// 128 yielded the best performance
+// on an Intel i7-9700k processor.
 
 #include <cstddef>
 #include <cassert>
