@@ -1,6 +1,5 @@
 #define CATCH_CONFIG_MAIN
 
-#include <iostream>
 #include "ra/matrix_transpose.hpp"
 #include <cstddef>
 #include <catch2/catch.hpp>
@@ -8,8 +7,8 @@
 using namespace ra::cache;
 
 TEMPLATE_TEST_CASE("Test matrix transpose", "[functions]",
-		float, double, long double, int, unsigned,
-		long int, long unsigned, long long int,
+		float, double, long double, int, unsigned, short,
+		long, long unsigned, long long int, short unsigned,
 		long long unsigned, int64_t, int32_t, int16_t,
 		int8_t, uint64_t, uint32_t, uint16_t, uint8_t){
 	TestType a[10000];
