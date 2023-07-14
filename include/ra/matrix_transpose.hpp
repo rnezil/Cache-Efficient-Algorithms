@@ -1,4 +1,7 @@
-#define MAX_TRANSPOSE_BLOCK_SIZE 64
+#define MAX_TRANSPOSE_BLOCK_SIZE 512
+// A max block size of 512 was found to yield the
+// best average performance on the Intel i7-9700k
+// processor.
 
 #include <cstddef>
 #include <list>
@@ -15,6 +18,100 @@ namespace ra::cache {
 // sixty-four.
 //
 // Matrices are stored in row-major order.
+
+struct trans_helper{
+	std::size_t m;
+	std::size_t n;
+	bool valid;
+};
+
+static trans_helper orig;
+
+template<class T>
+void matrix_transpose( const T* a, std::size_t m, std::size_t n, T* b ){
+	if( a == b ){
+		T* c = new T[m*n];
+		matrix_transpose( a, m, n, c );
+		std::size_t full_size = m*n;
+		for( std::size_t i = 0; i < full_size; ++i )
+			*(b + i) = *(c + i);
+		delete[] c;
+	}else{
+	bool last_pass {false};
+	if( !orig.valid ){
+		// Store original matrix dimensions
+		orig.n = n;
+		orig.m = m;
+		orig.valid = true;
+		last_pass = true;
+	}
+
+	if( m * n > MAX_TRANSPOSE_BLOCK_SIZE ){
+		// Split the matrix
+		if( m > n ){
+			// Split horizontally
+			std::size_t split = m/2;
+
+			// Top half
+			matrix_transpose( a, split, n, b );
+
+			// Bottom half
+			matrix_transpose( a + split*orig.n, m - split, n, b + split );
+		}else{
+			// Split vertically
+			std::size_t split = n/2;
+
+			// Left half
+			matrix_transpose( a, m, split, b );
+
+			// Bottom Half
+			matrix_transpose( a + split, m, n - split, b + split*orig.m );
+		}
+	}else{
+		// Compute the transposition and write the buffer
+		for( std::size_t i = 0; i < m; ++i )
+			for( std::size_t j = 0; j < n; ++j )
+				*(b + i + j*orig.m) = *(a + j + i*orig.n);
+	}
+
+	if( last_pass )
+		orig.valid = false;
+	}
+}
+
+template<class T>
+void naive_matrix_transpose( const T* a, std::size_t m, std::size_t n, T* b ){
+	if( a == b ){
+		T* c = new T[m*n];
+
+		for( std::size_t i = 0; i < m; ++i )
+			for( std::size_t j = 0; j < n; ++j )
+				*(c + i + j*m) = *(a + j + i*n);
+
+		for( std::size_t i = 0; i < n*m; ++i )
+			*(b + i) = *(c + i);
+
+		delete[] c;
+	}else{
+		for( std::size_t i = 0; i < m; ++i )
+			for( std::size_t j = 0; j < n; ++j )
+				*(b + i + j*m) = *(a + j + i*n);
+	}
+}
+
+}
+
+/*
+ * Original version of matrix_transpose below.
+ * This version was found to perform worse than
+ * the naive version for ALL values of
+ * MAX_TRANSPOSE_BLOCK_SIZE, and thus was not
+ * deemed acceptable. The version at the top of
+ * this file was written to replace it.
+ */
+
+
+/*
 template<class T>
 void matrix_transpose( const T* a, std::size_t m, std::size_t n, T* b ){
 	// Keeps track of vertical block spans
@@ -156,26 +253,5 @@ void matrix_transpose( const T* a, std::size_t m, std::size_t n, T* b ){
 		}
 	}
 }
-
-template<class T>
-void naive_matrix_transpose( const T* a, std::size_t m, std::size_t n, T* b ){
-	if( a == b ){
-		T* c = new T[m*n];
-
-		for( std::size_t i = 0; i < m; ++i )
-			for( std::size_t j = 0; j < n; ++j )
-				*(c + i + j*m) = *(a + j + i*n);
-
-		for( std::size_t i = 0; i < n*m; ++i )
-			*(b + i) = *(c + i);
-
-		delete[] c;
-	}else{
-		for( std::size_t i = 0; i < m; ++i )
-			for( std::size_t j = 0; j < n; ++j )
-				*(b + i + j*m) = *(a + j + i*n);
-	}
-}
-
-}
+*/
 

@@ -18,6 +18,6 @@ add_executable(test_matrix_transpose ${CMAKE_CURRENT_SOURCE_DIR}/app/test_matrix
 add_executable(test_matrix_multiply ${CMAKE_CURRENT_SOURCE_DIR}/app/test_matrix_multiply.cpp ${CMAKE_CURRENT_SOURCE_DIR}/include/ra/matrix_multiply.hpp)
 add_executable(test_fft ${CMAKE_CURRENT_SOURCE_DIR}/app/test_fft.cpp ${CMAKE_CURRENT_SOURCE_DIR}/include/ra/matrix_transpose.hpp ${CMAKE_CURRENT_SOURCE_DIR}/include/ra/fft.hpp)
 
-#Force C++20 for FFT otherwise std::numbers is unusable
+#Force C++20 for FFT
 target_compile_options(test_fft PUBLIC -std=c++20)
 
